@@ -25,7 +25,7 @@ func Is{{.Name}}(err error) bool {
 
 // {{ .Comment }}
 func New{{ .Name }}(format string, args ...interface{}) error {
-	 return errors.NewWithCode({{ .Name }}, format, args...)
+	 return errors.NewWithCodeX({{ .Name }}, fmt.Sprintf(format, args...), errors.WithSkipDepth(1))
 }
 
 {{- end }}

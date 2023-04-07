@@ -93,6 +93,7 @@ func main() {
 			src = g.buf.Bytes()
 		} else {
 			g.Printf("import %s", "\"github.com/leo/errors\"\n")
+			g.Printf("import %s", "\"fmt\"\n")
 			g.generate(typeName)
 			g.generateErrFuncs(typeName)
 			// Format the output.

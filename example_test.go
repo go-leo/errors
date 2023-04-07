@@ -1,53 +1,39 @@
 package errors
 
 import (
+	"errors"
 	"fmt"
 )
 
-func ExampleNew() {
-	err := NewWithCode(unknownCoder.Code(), "whoops")
+func ExampleNewWithCode() {
+	err := NewWithCode(ErrInvalidJSON, "id 1000")
 	fmt.Println(err)
-	// fmt.Printf("%+v", err)
+	fmt.Printf("%-v\n", err)
+	fmt.Printf("%+v\n", err)
 
-	// Output: An internal server error occurred
+	// Output: Data is not valid JSON
+	//#0 (1001) Data is not valid JSON, id 1000 [/Users/litao/code/errors/example_test.go:9 (github.com/leo/errors.ExampleNewWithCode)]
+	//#0 (1001) Data is not valid JSON, id 1000 [/Users/litao/code/errors/example_test.go:9 (github.com/leo/errors.ExampleNewWithCode)]
 }
 
-func ExampleNew_printf() {
-	err := NewWithCode(10001, "whoops 1")
-	fmt.Printf("%+v", err)
-
-	// Example output:
-	// whoops 1
-	// github.com/panda/errors_test.ExampleNew_printf
-	//         /home/dfc/src/github.com/panda/errors/example_test.go:17
-	// testing.runExample
-	//         /home/dfc/go/src/testing/example.go:114
-	// testing.RunExamples
-	//         /home/dfc/go/src/testing/example.go:38
-	// testing.(*M).Run
-	//         /home/dfc/go/src/testing/testing.go:744
-	// main.main
-	//         /github.com/panda/errors/_test/_testmain.go:106
-	// runtime.main
-	//         /home/dfc/go/src/runtime/proc.go:183
-	// runtime.goexit
-	//         /home/dfc/go/src/runtime/asm_amd64.s:2059
-}
-
-func ExampleWithCode() {
+func ExampleWrapC() {
 	var err error
 	err = NewWithCode(ConfigurationNotValid, "this is an error message")
 	fmt.Println(err)
+	err = WrapC(err, ErrInvalidJSON)
+	fmt.Println(err)
 	fmt.Println()
 
+	err = errors.New("this is an error message")
+	fmt.Println(err)
 	err = WrapC(err, ErrInvalidJSON)
-	fmt.Println(codes[err.(*WithCode).code].String())
 	fmt.Println(err)
 
 	// Output:
 	// ConfigurationNotValid error
-	//
 	// Data is not valid JSON
+	//
+	// this is an error message
 	// Data is not valid JSON
 }
 
@@ -57,7 +43,7 @@ func ExampleWithCode_code() {
 		err = WrapC(err, ErrLoadConfigFailed)
 	}
 
-	fmt.Println(err.(*WithCode).code)
+	fmt.Println(err.(*withCode).code)
 	// Output: 1003
 }
 
@@ -67,7 +53,7 @@ func ExampledefaultCoder_HTTPStatus() {
 		err = WrapC(err, ErrLoadConfigFailed)
 	}
 
-	fmt.Println(codes[err.(*WithCode).code].HTTPStatus())
+	fmt.Println(codes[err.(*withCode).code].HTTPStatus())
 	// Output: 500
 }
 
@@ -88,6 +74,6 @@ func ExampleString() {
 		err = WrapC(err, ErrLoadConfigFailed)
 	}
 
-	fmt.Println(codes[err.(*WithCode).code].String())
+	fmt.Println(codes[err.(*withCode).code].String())
 	// Output: Load configuration file failed
 }

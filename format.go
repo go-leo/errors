@@ -9,10 +9,11 @@ import (
 
 // formatInfo contains all the error information.
 type formatInfo struct {
-	code    int
-	message string
-	err     string
-	stack   *stack
+	code      int
+	message   string
+	err       string
+	stack     *stack
+	skipDepth int
 }
 
 // Format implements fmt.Formatter. https://golang.org/pkg/fmt/#hdr-Printing
@@ -35,7 +36,7 @@ type formatInfo struct {
 //      %#v:   [{"error":"error for internal read B"}]
 //      %#-v:  [{"caller":"#0 /home/lk/workspace/golang/src/github.com/panda/iam/main.go:12 (main.main)","error":"error for internal read B","message":"(#100102) Internal Server Error"}]
 //      %#+v:  [{"caller":"#0 /home/lk/workspace/golang/src/github.com/panda/iam/main.go:12 (main.main)","error":"error for internal read B","message":"(#100102) Internal Server Error"},{"caller":"#1 /home/lk/workspace/golang/src/github.com/panda/iam/main.go:35 (main.newErrorB)","error":"error for internal read A","message":"(#100104) Validation failed"}]
-func (w *WithCode) Format(state fmt.State, verb rune) {
+func (w *withCode) Format(state fmt.State, verb rune) {
 	switch verb {
 	case 'v':
 		str := bytes.NewBuffer([]byte{})
@@ -46,15 +47,12 @@ func (w *WithCode) Format(state fmt.State, verb rune) {
 			flagTrace  bool
 			modeJSON   bool
 		)
-
 		if state.Flag('#') {
 			modeJSON = true
 		}
-
 		if state.Flag('-') {
 			flagDetail = true
 		}
-
 		if state.Flag('+') {
 			flagTrace = true
 		}
@@ -71,16 +69,10 @@ func (w *WithCode) Format(state fmt.State, verb rune) {
 			if !flagTrace {
 				break
 			}
-
-			if !flagDetail && !flagTrace && !modeJSON {
-				break
-			}
 		}
 
 		if modeJSON {
-			var byts []byte
-			byts, _ = json.Marshal(jsonData)
-
+			byts, _ := json.Marshal(jsonData)
 			str.Write(byts)
 		}
 
@@ -123,20 +115,20 @@ func format(k int, jsonData []map[string]interface{}, str *bytes.Buffer, finfo *
 		jsonData = append(jsonData, data)
 	} else {
 		if flagDetail || flagTrace {
-			if finfo.stack != nil {
-				f := Frame((*finfo.stack)[0])
-				fmt.Fprintf(str, "%s%s - #%d [%s:%d (%s)] (%d) %s",
-					sep,
-					finfo.err,
+			if finfo.stack != nil && len(*finfo.stack) > finfo.skipDepth {
+				f := Frame((*finfo.stack)[finfo.skipDepth])
+				fmt.Fprintf(str, "#%d %s(%d) %s, %s [%s:%d (%s)]",
 					k,
+					sep,
+					finfo.code,
+					finfo.message,
+					finfo.err,
 					f.file(),
 					f.line(),
 					f.name(),
-					finfo.code,
-					finfo.message,
 				)
 			} else {
-				fmt.Fprintf(str, "%s%s - #%d %s", sep, finfo.err, k, finfo.message)
+				fmt.Fprintf(str, "#%d %s(%d) %s, %s [%s]", k, sep, finfo.code, finfo.message, finfo.err, finfo.message)
 			}
 		} else {
 			fmt.Fprintf(str, finfo.message)
@@ -166,7 +158,7 @@ func buildFormatInfo(e error) *formatInfo {
 	var finfo *formatInfo
 
 	switch err := e.(type) {
-	case *WithCode:
+	case *withCode:
 		coder, ok := codes[err.code]
 		if !ok {
 			coder = unknownCoder
@@ -178,10 +170,11 @@ func buildFormatInfo(e error) *formatInfo {
 		}
 
 		finfo = &formatInfo{
-			code:    coder.Code(),
-			message: extMsg,
-			err:     err.err.Error(),
-			stack:   err.stack,
+			code:      coder.Code(),
+			message:   extMsg,
+			err:       err.err.Error(),
+			stack:     err.stack,
+			skipDepth: err.skipDepth,
 		}
 	default:
 		finfo = &formatInfo{

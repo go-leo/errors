@@ -20,6 +20,7 @@ const (
 	ErrInvalidJSON
 	ErrEOF
 	ErrLoadConfigFailed
+	ErrUserNoRegister
 )
 
 func init() {
@@ -27,6 +28,7 @@ func init() {
 	Register(defaultCoder{ErrInvalidJSON, 500, "Data is not valid JSON", ""})
 	Register(defaultCoder{ErrEOF, 500, "End of input", ""})
 	Register(defaultCoder{ErrLoadConfigFailed, 500, "Load configuration file failed", ""})
+	Register(defaultCoder{ErrUserNoRegister, 400, "user no register, go to create", ""})
 }
 
 func loadConfig() error {

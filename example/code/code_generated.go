@@ -2,6 +2,7 @@
 package code
 
 import "github.com/leo/errors"
+import "fmt"
 
 // init register error codes defines in this source code to `github.com/leo/errors`
 func init() {
@@ -21,7 +22,7 @@ func IsErrAccountAuthTypeInvalid(err error) bool {
 
 // Account AuthType not support
 func NewErrAccountAuthTypeInvalid(format string, args ...interface{}) error {
-	return errors.NewWithCode(ErrAccountAuthTypeInvalid, format, args...)
+	return errors.NewWithCodeX(ErrAccountAuthTypeInvalid, fmt.Sprintf(format, args...), errors.WithSkipDepth(1))
 }
 
 // Account generate token failed
@@ -35,7 +36,7 @@ func IsErrAccountGenerateTokenFailed(err error) bool {
 
 // Account generate token failed
 func NewErrAccountGenerateTokenFailed(format string, args ...interface{}) error {
-	return errors.NewWithCode(ErrAccountGenerateTokenFailed, format, args...)
+	return errors.NewWithCodeX(ErrAccountGenerateTokenFailed, fmt.Sprintf(format, args...), errors.WithSkipDepth(1))
 }
 
 // Account already login, logout to login other account
@@ -49,5 +50,5 @@ func IsErrAccountAlreadyLogin(err error) bool {
 
 // Account already login, logout to login other account
 func NewErrAccountAlreadyLogin(format string, args ...interface{}) error {
-	return errors.NewWithCode(ErrAccountAlreadyLogin, format, args...)
+	return errors.NewWithCodeX(ErrAccountAlreadyLogin, fmt.Sprintf(format, args...), errors.WithSkipDepth(1))
 }

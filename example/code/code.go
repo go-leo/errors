@@ -1,7 +1,7 @@
 package code
 
-//go:generate codegen2 -type=int
-//go:generate codegen2 -type=int -doc -output ../../../docs/guide/zh-CN/api/error_code_generated.md
+//go:generate codegen -type=int
+//go:generate codegen -type=int -doc -output ../docs/error_code_generated.md
 
 // Account-server: Account errors.
 const (

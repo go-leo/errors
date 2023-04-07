@@ -110,7 +110,7 @@ func ParseCoder(err error) Coder {
 		return nil
 	}
 
-	v := new(WithCode)
+	v := new(withCode)
 
 	if errors.As(err, &v) {
 		if coder, ok := codes[v.code]; ok {
@@ -142,7 +142,7 @@ func GRPCStatus(err error) *status.Status {
 
 	var c Coder = unknownCoder
 
-	if v := new(WithCode); errors.As(err, &v) {
+	if v := new(withCode); errors.As(err, &v) {
 		coder, ok := codes[v.code]
 		if ok {
 			c = coder
@@ -172,7 +172,7 @@ func GetCoder(code int) Coder {
 
 // IsCode reports whether any error in err's chain contains the given error code.
 func IsCode(err error, code int) bool {
-	if v := new(WithCode); errors.As(err, &v) {
+	if v := new(withCode); errors.As(err, &v) {
 		if v.code == code {
 			return true
 		}

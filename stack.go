@@ -9,6 +9,14 @@ import (
 	"strings"
 )
 
+// user for stack print with '%-v' format.
+var maxStackPrintDepth = 3
+
+// set coustom maxStackDepth.
+func SetMaxStackPrintDepth(depth int) {
+	maxStackPrintDepth = depth
+}
+
 const unknown = "unknown"
 
 // Frame represents a program counter inside a stack frame.
@@ -154,14 +162,21 @@ func (st StackTrace) formatSlice(s fmt.State, verb rune) {
 type stack []uintptr
 
 func (s *stack) Format(st fmt.State, verb rune) {
+	if s == nil {
+		return
+	}
 	switch verb {
 	case 'v':
+		pcs := []uintptr(*s)
 		switch {
-		case st.Flag('+'):
-			for _, pc := range *s {
-				f := Frame(pc)
-				fmt.Fprintf(st, "\n%+v", f)
+		case st.Flag('-'):
+			if len(pcs) > maxStackPrintDepth {
+				pcs = pcs[:maxStackPrintDepth]
 			}
+		}
+		for _, pc := range pcs {
+			f := Frame(pc)
+			fmt.Fprintf(st, "\n%+v", f)
 		}
 	}
 }
