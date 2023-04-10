@@ -133,6 +133,16 @@ func ParseCoder(err error) Coder {
 	return unknownCoder
 }
 
+// GRPCErr convert error to grpc error.
+// if err no register Coder, return unknown grpc error.
+func GRPCErr(err error) error {
+	s := GRPCStatus(err)
+	if s == nil {
+		return nil
+	}
+	return s.Err()
+}
+
 // GRPCStatus convert error to grpc error.
 // if err no register Coder, return unknown grpc error.
 func GRPCStatus(err error) *status.Status {
@@ -172,16 +182,8 @@ func GetCoder(code int) Coder {
 
 // IsCode reports whether any error in err's chain contains the given error code.
 func IsCode(err error, code int) bool {
-	if v := new(withCode); errors.As(err, &v) {
-		if v.code == code {
-			return true
-		}
-
-		if v.cause != nil {
-			return IsCode(v.cause, code)
-		}
-
-		return false
+	if coder := ParseCoder(err); coder != nil {
+		return coder.Code() == code
 	}
 
 	return false

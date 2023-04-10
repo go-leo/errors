@@ -3,6 +3,8 @@ package errors
 import (
 	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestWithCode(t *testing.T) {
@@ -45,6 +47,15 @@ func TestWithCodef(t *testing.T) {
 			t.Errorf("WithCode(%v, %q %q): got: %v, want %v", tt.code, tt.format, tt.args, got.Error(), tt.wangString)
 		}
 	}
+}
+
+func TestIsCode(t *testing.T) {
+	// raw error
+	err := NewWithCode(ConfigurationNotValid, "Configuration id %s", "10001")
+	assert.True(t, IsCode(err, ConfigurationNotValid))
+
+	// grpc error
+	assert.True(t, IsCode(GRPCErr(err), ConfigurationNotValid))
 }
 
 func TestParseCoder(t *testing.T) {

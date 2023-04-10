@@ -190,6 +190,13 @@ func (s *stack) StackTrace() StackTrace {
 	return f
 }
 
+// func hasStack(err interface{}) bool {
+// 	if _, ok := err.(interface{ StackTrace() StackTrace }); ok {
+// 		return true
+// 	}
+// 	return false
+// }
+
 func callers() *stack {
 	const depth = 32
 

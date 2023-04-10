@@ -6,15 +6,6 @@ import (
 	"io"
 )
 
-type withCode struct {
-	err   error
-	code  int
-	cause error
-	*stack
-	// jumpDepth is the number of stack frames to skip when reporting
-	skipDepth int
-}
-
 // New return a std error.
 func New(format string, args ...interface{}) error {
 	return fmt.Errorf(format, args...)
@@ -28,63 +19,6 @@ func NewWithStack(format string, args ...interface{}) error {
 	}
 }
 
-// option for withCode
-type option func(*withCode)
-
-// WithSkipDepth set skip depth.
-func WithSkipDepth(skipDepth int) option {
-	return func(w *withCode) {
-		w.skipDepth = skipDepth
-	}
-}
-
-// NewWithCode new error has default describe.
-func NewWithCode(code int, format string, args ...interface{}) *withCode {
-	return &withCode{
-		err:   fmt.Errorf(format, args...),
-		code:  code,
-		stack: callers(),
-	}
-}
-
-// NewWithCodeX new error with code with options.
-func NewWithCodeX(code int, message string, opts ...option) *withCode {
-	w := &withCode{
-		err:   fmt.Errorf(message),
-		code:  code,
-		stack: callers(),
-	}
-
-	for _, opt := range opts {
-		opt(w)
-	}
-
-	return w
-}
-
-// WrapC .
-func WrapC(err error, code int) *withCode {
-	if err == nil {
-		return nil
-	}
-
-	return &withCode{
-		err:   err,
-		code:  code,
-		cause: err,
-		stack: callers(),
-	}
-}
-
-// Error return the externally-safe error message.
-func (w *withCode) Error() string { return fmt.Sprintf("%v", w) }
-
-// Cause return the cause of the WithCode error.
-func (w *withCode) Cause() error { return w.cause }
-
-// Unwrap provides compatibility for Go 1.13 error chains.
-func (w *withCode) Unwrap() error { return w.cause }
-
 // WithStack annotates err with a stack trace at the point WithStack was called.
 // If err is nil, WithStack returns nil.
 func WithStack(err error) error {
@@ -92,19 +26,61 @@ func WithStack(err error) error {
 		return nil
 	}
 
-	if e, ok := err.(*withCode); ok {
+	if wc := new(withCode); As(err, &wc) {
 		return &withCode{
-			err:   e.err,
-			code:  e.code,
+			err:   wc.err,
+			code:  wc.code,
 			cause: err,
 			stack: callers(),
 		}
+	}
+	if e := new(withStack); As(err, &e) {
+		return e
 	}
 
 	return &withStack{
 		err,
 		callers(),
 	}
+}
+
+// can use this function instead WithMessage(WithStack(err), message).
+// Wrap returns an error annotating err with a stack trace
+// at the point Wrap is called, and the supplied message.
+// If err is nil, Wrap returns nil.
+func WrapStack(err error, message string) error {
+	if err == nil {
+		return nil
+	}
+	if wc := new(withCode); As(err, &wc) {
+		return &withCode{
+			err:   fmt.Errorf(message),
+			code:  wc.code,
+			cause: err,
+			stack: callers(),
+		}
+	}
+
+	messageErr := &withMessage{
+		cause: err,
+		msg:   message,
+	}
+	if ws := new(withStack); As(err, &ws) {
+		return messageErr
+	}
+
+	return &withStack{
+		messageErr,
+		callers(),
+	}
+}
+
+// can use this function instead WithMessagef(WithStack(err), format, args...).
+// Wrapf returns an error annotating err with a stack trace
+// at the point Wrapf is called, and the format specifier.
+// If err is nil, Wrapf returns nil.
+func WrapStackf(err error, format string, args ...interface{}) error {
+	return WrapStack(err, fmt.Sprintf(format, args...))
 }
 
 type withStack struct {
@@ -145,6 +121,113 @@ func (w *withStack) Format(s fmt.State, verb rune) {
 		fmt.Fprintf(s, "%q", w.Error())
 	}
 }
+
+// option for withCode
+type option func(*withCode)
+
+// WithSkipDepth set skip depth.
+func WithSkipDepth(skipDepth int) option {
+	return func(w *withCode) {
+		w.skipDepth = skipDepth
+	}
+}
+
+// NewWithCode new error has default describe.
+func NewWithCode(code int, format string, args ...interface{}) *withCode {
+	return &withCode{
+		err:   fmt.Errorf(format, args...),
+		code:  code,
+		stack: callers(),
+	}
+}
+
+// NewWithCodeX new error with code with options.
+func NewWithCodeX(code int, message string, opts ...option) *withCode {
+	w := &withCode{
+		err:   fmt.Errorf(message),
+		code:  code,
+		stack: callers(),
+	}
+
+	for _, opt := range opts {
+		opt(w)
+	}
+
+	return w
+}
+
+// WrapC return an error annotating err with a stack trace and error code.
+// Deprecated: Use WithCode instead.
+func WrapC(err error, code int) *withCode {
+	if err == nil {
+		return nil
+	}
+
+	return &withCode{
+		err:   err,
+		code:  code,
+		cause: err,
+		stack: callers(),
+	}
+}
+
+// WithCode return an error annotating err with a stack trace and error code.
+func WithCode(err error, code int) *withCode {
+	if err == nil {
+		return nil
+	}
+
+	return &withCode{
+		err:   err,
+		code:  code,
+		cause: err,
+		stack: callers(),
+	}
+}
+
+func WrapCode(err error, code int, message string) *withCode {
+	if err == nil {
+		return nil
+	}
+
+	return &withCode{
+		err:   fmt.Errorf(message),
+		code:  code,
+		cause: err,
+		stack: callers(),
+	}
+}
+
+func WrapCodef(err error, code int, format string, args ...interface{}) *withCode {
+	if err == nil {
+		return nil
+	}
+
+	return &withCode{
+		err:   fmt.Errorf(format, args...),
+		code:  code,
+		cause: err,
+		stack: callers(),
+	}
+}
+
+type withCode struct {
+	err   error
+	code  int
+	cause error
+	*stack
+	// jumpDepth is the number of stack frames to skip when reporting
+	skipDepth int
+}
+
+// Error return the externally-safe error message.
+func (w *withCode) Error() string { return fmt.Sprintf("%v", w) }
+
+// Cause return the cause of the WithCode error.
+func (w *withCode) Cause() error { return w.cause }
+
+// Unwrap provides compatibility for Go 1.13 error chains.
+func (w *withCode) Unwrap() error { return w.cause }
 
 // WithMessage annotates err with a new message.
 // If err is nil, WithMessage returns nil.
