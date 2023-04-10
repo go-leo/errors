@@ -3,8 +3,8 @@ package example
 import (
 	"testing"
 
-	"github.com/leo/errors"
-	"github.com/leo/errors/example/code"
+	"github.com/go-leo/errors"
+	"github.com/go-leo/errors/example/code"
 	"github.com/stretchr/testify/assert"
 )
 

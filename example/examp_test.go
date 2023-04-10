@@ -3,8 +3,8 @@ package example
 import (
 	"fmt"
 
-	"github.com/leo/errors"
-	"github.com/leo/errors/example/code"
+	"github.com/go-leo/errors"
+	"github.com/go-leo/errors/example/code"
 )
 
 func Example() {
@@ -25,22 +25,22 @@ func Example() {
 
 	//Output:
 	//Account AuthType not support
-	// #0 (110001) Account AuthType not support, token  [/Users/litao/code/errors/example/examp_test.go:64 (github.com/leo/errors/example.getUser)]
-	// #0 (110001) Account AuthType not support, token  [/Users/litao/code/errors/example/examp_test.go:64 (github.com/leo/errors/example.getUser)]
+	// #0 (110001) Account AuthType not support, token  [/Users/litao/code/errors/example/examp_test.go:64 (github.com/go-leo/errors/example.getUser)]
+	// #0 (110001) Account AuthType not support, token  [/Users/litao/code/errors/example/examp_test.go:64 (github.com/go-leo/errors/example.getUser)]
 	// datebase, connection error!
 	// datebase, connection error!
-	// github.com/leo/errors/example.getUserByID
+	// github.com/go-leo/errors/example.getUserByID
 	// 	/Users/litao/code/errors/example/examp_test.go:82
-	// github.com/leo/errors/example.getUser
+	// github.com/go-leo/errors/example.getUser
 	// 	/Users/litao/code/errors/example/examp_test.go:71
-	// github.com/leo/errors/example.Example
+	// github.com/go-leo/errors/example.Example
 	// 	/Users/litao/code/errors/example/examp_test.go:16
 	// datebase, connection error!
-	// github.com/leo/errors/example.getUserByID
+	// github.com/go-leo/errors/example.getUserByID
 	// 	/Users/litao/code/errors/example/examp_test.go:82
-	// github.com/leo/errors/example.getUser
+	// github.com/go-leo/errors/example.getUser
 	// 	/Users/litao/code/errors/example/examp_test.go:71
-	// github.com/leo/errors/example.Example
+	// github.com/go-leo/errors/example.Example
 	// 	/Users/litao/code/errors/example/examp_test.go:16
 	// testing.runExample
 	// 	/Users/litao/.go/current/src/testing/run_example.go:63
@@ -55,8 +55,8 @@ func Example() {
 	// runtime.goexit
 	// 	/Users/litao/.go/current/src/runtime/asm_amd64.s:1571
 	// Account AuthType not support
-	// #0 (110001) Account AuthType not support, uid  [/Users/litao/code/errors/example/examp_test.go:78 (github.com/leo/errors/example.getUserByID)]
-	// #0 (110001) Account AuthType not support, uid  [/Users/litao/code/errors/example/examp_test.go:78 (github.com/leo/errors/example.getUserByID)]
+	// #0 (110001) Account AuthType not support, uid  [/Users/litao/code/errors/example/examp_test.go:78 (github.com/go-leo/errors/example.getUserByID)]
+	// #0 (110001) Account AuthType not support, uid  [/Users/litao/code/errors/example/examp_test.go:78 (github.com/go-leo/errors/example.getUserByID)]
 }
 
 func getUser(token string) error {

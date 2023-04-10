@@ -12,8 +12,8 @@ func ExampleNewWithCode() {
 	fmt.Printf("%+v\n", err)
 
 	// Output: Data is not valid JSON
-	//#0 (1001) Data is not valid JSON, id 1000 [/Users/litao/code/errors/example_test.go:9 (github.com/leo/errors.ExampleNewWithCode)]
-	//#0 (1001) Data is not valid JSON, id 1000 [/Users/litao/code/errors/example_test.go:9 (github.com/leo/errors.ExampleNewWithCode)]
+	//#0 (1001) Data is not valid JSON, id 1000 [/Users/litao/code/errors/example_test.go:9 (github.com/go-leo/errors.ExampleNewWithCode)]
+	//#0 (1001) Data is not valid JSON, id 1000 [/Users/litao/code/errors/example_test.go:9 (github.com/go-leo/errors.ExampleNewWithCode)]
 }
 
 func ExampleWrapC() {

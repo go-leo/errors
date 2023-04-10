@@ -1,9 +1,8 @@
-module github.com/leo/errors
+module github.com/go-leo/errors
 
 go 1.18
 
 require (
-	github.com/novalagung/gubrak v1.0.0
 	github.com/stretchr/testify v1.2.2
 	golang.org/x/tools v0.6.0
 	google.golang.org/grpc v1.52.3

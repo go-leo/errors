@@ -3,7 +3,7 @@ package code
 import (
 	"net/http"
 
-	"github.com/leo/errors"
+	"github.com/go-leo/errors"
 
 	"github.com/novalagung/gubrak"
 )
