@@ -21,7 +21,10 @@
 
 | Identifier | Code | HTTP Code | Description |
 | ---------- | ---- | --------- | ----------- |
+| ErrUnknown | 100001 | 500 | Internal server error |
+| ErrBind | 100002 | 400 | Error occurred while binding the request body to the struct |
+| ErrValidation | 100003 | 400 | Validation failed |
 | ErrAccountAuthTypeInvalid | 110001 | 400 | Account AuthType not support |
-| ErrAccountGenerateTokenFailed | 110002 | 500 | Account generate token failed |
-| ErrAccountAlreadyLogin | 110003 | 200 | Account already login, logout to login other account |
+| ErrUserNotFound | 110002 | 400 | User Not Found |
+| ErrUserDisabled | 110003 | 400 | User disabled |
 

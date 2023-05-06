@@ -133,7 +133,7 @@ func WithSkipDepth(skipDepth int) option {
 }
 
 // NewWithCode new error has default describe.
-func NewWithCode(code int, format string, args ...interface{}) *withCode {
+func NewWithCode(code int, format string, args ...interface{}) error {
 	return &withCode{
 		err:   fmt.Errorf(format, args...),
 		code:  code,
@@ -142,7 +142,7 @@ func NewWithCode(code int, format string, args ...interface{}) *withCode {
 }
 
 // NewWithCodeX new error with code with options.
-func NewWithCodeX(code int, message string, opts ...option) *withCode {
+func NewWithCodeX(code int, message string, opts ...option) error {
 	w := &withCode{
 		err:   fmt.Errorf(message),
 		code:  code,
@@ -158,7 +158,7 @@ func NewWithCodeX(code int, message string, opts ...option) *withCode {
 
 // WrapC return an error annotating err with a stack trace and error code.
 // Deprecated: Use WithCode instead.
-func WrapC(err error, code int) *withCode {
+func WrapC(err error, code int) error {
 	if err == nil {
 		return nil
 	}
@@ -172,7 +172,7 @@ func WrapC(err error, code int) *withCode {
 }
 
 // WithCode return an error annotating err with a stack trace and error code.
-func WithCode(err error, code int) *withCode {
+func WithCode(err error, code int) error {
 	if err == nil {
 		return nil
 	}
@@ -185,7 +185,7 @@ func WithCode(err error, code int) *withCode {
 	}
 }
 
-func WrapCode(err error, code int, message string) *withCode {
+func WrapCode(err error, code int, message string) error {
 	if err == nil {
 		return nil
 	}
@@ -198,7 +198,7 @@ func WrapCode(err error, code int, message string) *withCode {
 	}
 }
 
-func WrapCodef(err error, code int, format string, args ...interface{}) *withCode {
+func WrapCodef(err error, code int, format string, args ...interface{}) error {
 	if err == nil {
 		return nil
 	}

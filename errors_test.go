@@ -19,8 +19,9 @@ func TestWithCode(t *testing.T) {
 
 	for _, tt := range tests {
 		got := NewWithCode(tt.code, tt.message)
-		if got.code != tt.wantCode {
-			t.Errorf("WithCode(%v, %q): got: %v, want %v", tt.code, tt.message, got.code, tt.wantCode)
+		e := ParseCoder(got)
+		if e.Code() != tt.wantCode {
+			t.Errorf("WithCode(%v, %q): got: %v, want %v", tt.code, tt.message, e.Code(), tt.wantCode)
 		}
 	}
 }
@@ -39,8 +40,9 @@ func TestWithCodef(t *testing.T) {
 
 	for _, tt := range tests {
 		got := NewWithCode(tt.code, tt.format, tt.args)
-		if got.code != tt.wantCode {
-			t.Errorf("WithCode(%v, %q %q): got: %v, want %v", tt.code, tt.format, tt.args, got.code, tt.wantCode)
+		e := ParseCoder(got)
+		if e.Code() != tt.wantCode {
+			t.Errorf("WithCode(%v, %q %q): got: %v, want %v", tt.code, tt.format, tt.args, e.Code(), tt.wantCode)
 		}
 
 		if got.Error() != tt.wangString {

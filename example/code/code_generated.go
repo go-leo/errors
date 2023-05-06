@@ -6,9 +6,54 @@ import "fmt"
 
 // init register error codes defines in this source code to `github.com/go-leo/errors`
 func init() {
+	register(ErrUnknown, 500, "Internal server error")
+	register(ErrBind, 400, "Error occurred while binding the request body to the struct")
+	register(ErrValidation, 400, "Validation failed")
 	register(ErrAccountAuthTypeInvalid, 400, "Account AuthType not support")
-	register(ErrAccountGenerateTokenFailed, 500, "Account generate token failed")
-	register(ErrAccountAlreadyLogin, 200, "Account already login, logout to login other account")
+	register(ErrUserNotFound, 400, "User Not Found")
+	register(ErrUserDisabled, 400, "User disabled")
+}
+
+// Internal server error
+func IsErrUnknown(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.ParseCoder(err)
+	return e.Code() == 100001 && e.HTTPStatus() == 500
+}
+
+// Internal server error
+func NewErrUnknown(format string, args ...interface{}) error {
+	return errors.NewWithCodeX(ErrUnknown, fmt.Sprintf(format, args...), errors.WithSkipDepth(1))
+}
+
+// Error occurred while binding the request body to the struct
+func IsErrBind(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.ParseCoder(err)
+	return e.Code() == 100002 && e.HTTPStatus() == 400
+}
+
+// Error occurred while binding the request body to the struct
+func NewErrBind(format string, args ...interface{}) error {
+	return errors.NewWithCodeX(ErrBind, fmt.Sprintf(format, args...), errors.WithSkipDepth(1))
+}
+
+// Validation failed
+func IsErrValidation(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.ParseCoder(err)
+	return e.Code() == 100003 && e.HTTPStatus() == 400
+}
+
+// Validation failed
+func NewErrValidation(format string, args ...interface{}) error {
+	return errors.NewWithCodeX(ErrValidation, fmt.Sprintf(format, args...), errors.WithSkipDepth(1))
 }
 
 // Account AuthType not support
@@ -25,30 +70,30 @@ func NewErrAccountAuthTypeInvalid(format string, args ...interface{}) error {
 	return errors.NewWithCodeX(ErrAccountAuthTypeInvalid, fmt.Sprintf(format, args...), errors.WithSkipDepth(1))
 }
 
-// Account generate token failed
-func IsErrAccountGenerateTokenFailed(err error) bool {
+// User Not Found
+func IsErrUserNotFound(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.ParseCoder(err)
-	return e.Code() == 110002 && e.HTTPStatus() == 500
+	return e.Code() == 110002 && e.HTTPStatus() == 400
 }
 
-// Account generate token failed
-func NewErrAccountGenerateTokenFailed(format string, args ...interface{}) error {
-	return errors.NewWithCodeX(ErrAccountGenerateTokenFailed, fmt.Sprintf(format, args...), errors.WithSkipDepth(1))
+// User Not Found
+func NewErrUserNotFound(format string, args ...interface{}) error {
+	return errors.NewWithCodeX(ErrUserNotFound, fmt.Sprintf(format, args...), errors.WithSkipDepth(1))
 }
 
-// Account already login, logout to login other account
-func IsErrAccountAlreadyLogin(err error) bool {
+// User disabled
+func IsErrUserDisabled(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.ParseCoder(err)
-	return e.Code() == 110003 && e.HTTPStatus() == 200
+	return e.Code() == 110003 && e.HTTPStatus() == 400
 }
 
-// Account already login, logout to login other account
-func NewErrAccountAlreadyLogin(format string, args ...interface{}) error {
-	return errors.NewWithCodeX(ErrAccountAlreadyLogin, fmt.Sprintf(format, args...), errors.WithSkipDepth(1))
+// User disabled
+func NewErrUserDisabled(format string, args ...interface{}) error {
+	return errors.NewWithCodeX(ErrUserDisabled, fmt.Sprintf(format, args...), errors.WithSkipDepth(1))
 }
