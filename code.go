@@ -9,8 +9,11 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// global default error codes
 var (
-	unknownCoder defaultCoder = defaultCoder{1, http.StatusInternalServerError, "An internal server error occurred", "http://github.com/panda/errors/README.md"}
+	UnknownCoder    Coder = defaultCoder{1, http.StatusInternalServerError, "An internal server error occurred", "http://github.com/go-leo/errors/README.md"}
+	BindCoder       Coder = defaultCoder{2, http.StatusBadRequest, "Error occurred while binding the request params to the struct", ""}
+	ValidationCoder Coder = defaultCoder{3, http.StatusBadRequest, "Request params validate failed", ""}
 )
 
 // Coder defines an interface for an error code detail information.
@@ -69,8 +72,10 @@ func (coder defaultCoder) Reference() string {
 }
 
 // codes contains a map of error codes to metadata.
-var codes = map[int]Coder{}
-var codeMux = &sync.Mutex{}
+var (
+	codes   = map[int]Coder{}
+	codeMux = &sync.Mutex{}
+)
 
 // Register register a user define error code.
 // It will overrid the exist code.
@@ -120,7 +125,7 @@ func ParseCoder(err error) Coder {
 
 	ge, ok := status.FromError(err)
 	if !ok {
-		return unknownCoder
+		return UnknownCoder
 	}
 
 	for _, detail := range ge.Details() {
@@ -130,7 +135,7 @@ func ParseCoder(err error) Coder {
 		}
 	}
 
-	return unknownCoder
+	return UnknownCoder
 }
 
 // GRPCErr convert error to grpc error.
@@ -150,7 +155,7 @@ func GRPCStatus(err error) *status.Status {
 		return nil
 	}
 
-	var c Coder = unknownCoder
+	var c Coder = UnknownCoder
 
 	if v := new(withCode); errors.As(err, &v) {
 		coder, ok := codes[v.code]
@@ -177,7 +182,7 @@ func GetCoder(code int) Coder {
 		return coder
 	}
 
-	return unknownCoder
+	return UnknownCoder
 }
 
 // IsCode reports whether any error in err's chain contains the given error code.
@@ -190,5 +195,5 @@ func IsCode(err error, code int) bool {
 }
 
 func init() {
-	codes[unknownCoder.Code()] = unknownCoder
+	codes[UnknownCoder.Code()] = UnknownCoder
 }

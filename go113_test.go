@@ -9,7 +9,7 @@ import (
 
 func TestErrorChainCompat(t *testing.T) {
 	err := stderrors.New("error that gets wrapped")
-	wrapped := WrapC(err, unknownCoder.C)
+	wrapped := WrapC(err, UnknownCoder.Code())
 	if !stderrors.Is(wrapped, err) {
 		t.Errorf("Wrap does not support Go 1.13 error chains")
 	}
@@ -52,7 +52,7 @@ type customErr struct {
 func (c customErr) Error() string { return c.msg }
 
 func TestAs(t *testing.T) {
-	var err = customErr{msg: "test message"}
+	err := customErr{msg: "test message"}
 
 	type args struct {
 		err    error

@@ -85,7 +85,8 @@ func (w *withCode) Format(state fmt.State, verb rune) {
 }
 
 func format(k int, jsonData []map[string]interface{}, str *bytes.Buffer, finfo *formatInfo,
-	sep string, flagDetail, flagTrace, modeJSON bool) ([]map[string]interface{}, *bytes.Buffer) {
+	sep string, flagDetail, flagTrace, modeJSON bool,
+) ([]map[string]interface{}, *bytes.Buffer) {
 	if modeJSON {
 		data := map[string]interface{}{}
 		if flagDetail || flagTrace {
@@ -161,7 +162,7 @@ func buildFormatInfo(e error) *formatInfo {
 	case *withCode:
 		coder, ok := codes[err.code]
 		if !ok {
-			coder = unknownCoder
+			coder = UnknownCoder
 		}
 
 		extMsg := coder.String()
@@ -178,7 +179,7 @@ func buildFormatInfo(e error) *formatInfo {
 		}
 	default:
 		finfo = &formatInfo{
-			code:    unknownCoder.Code(),
+			code:    UnknownCoder.Code(),
 			message: err.Error(),
 			err:     err.Error(),
 		}
