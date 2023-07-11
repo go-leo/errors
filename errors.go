@@ -1,9 +1,12 @@
 // Package errors provides simple error handling primitives.
+// You can return an error with a business code, and the error implements GRPCStatus() *Status for grpc transport.
 package errors
 
 import (
 	"fmt"
 	"io"
+
+	"google.golang.org/grpc/status"
 )
 
 // New return a std error.
@@ -229,6 +232,9 @@ func (w *withCode) Cause() error { return w.cause }
 // Unwrap provides compatibility for Go 1.13 error chains.
 func (w *withCode) Unwrap() error { return w.cause }
 
+// impl grpc func GRPCStatus() *Status
+func (w *withCode) GRPCStatus() *status.Status { return GRPCCodeStatus(w.code) }
+
 // WithMessage annotates err with a new message.
 // If err is nil, WithMessage returns nil.
 func WithMessage(err error, message string) error {
@@ -266,7 +272,7 @@ func (w *withMessage) Cause() error  { return w.cause }
 // Unwrap provides compatibility for Go 1.13 error chains.
 func (w *withMessage) Unwrap() error { return w.cause }
 
-//nolint: errcheck // WriteString could no check in pkg
+// nolint: errcheck // WriteString could no check in pkg
 func (w *withMessage) Format(s fmt.State, verb rune) {
 	switch verb {
 	case 'v':
@@ -287,9 +293,9 @@ func (w *withMessage) Format(s fmt.State, verb rune) {
 // An error value has a cause if it implements the following
 // interface:
 //
-//     type causer interface {
-//            Cause() error
-//     }
+//	type causer interface {
+//	       Cause() error
+//	}
 //
 // If the error does not implement Cause, the original error will
 // be returned. If the error is nil, nil will be returned without further

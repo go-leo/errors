@@ -23,11 +23,12 @@ import (
 )
 
 var (
-	typeNames  = flag.String("type", "", "comma-separated list of type names; must be set")
-	output     = flag.String("output", "", "output file name; default srcdir/<type>_string.go")
-	trimprefix = flag.String("trimprefix", "", "trim the `prefix` from the generated constant names")
-	buildTags  = flag.String("tags", "", "comma-separated list of build tags to apply")
-	doc        = flag.Bool("doc", false, "if true only generate error code documentation in markdown format")
+	typeNames   = flag.String("type", "", "comma-separated list of type names; must be set")
+	output      = flag.String("output", "", "output file name; default srcdir/<type>_string.go")
+	trimprefix  = flag.String("trimprefix", "", "trim the `prefix` from the generated constant names")
+	buildTags   = flag.String("tags", "", "comma-separated list of build tags to apply")
+	registerpkg = flag.String("registerpkg", "", "register function's pkg")
+	doc         = flag.Bool("doc", false, "if true only generate error code documentation in markdown format")
 )
 
 // Usage is a replacement usage function for the flags package.
@@ -64,7 +65,8 @@ func main() {
 	// Parse the package once.
 	var dir string
 	g := Generator{
-		trimPrefix: *trimprefix,
+		trimPrefix:  *trimprefix,
+		registerPkg: *registerpkg,
 	}
 	// TODO(suzmue): accept other patterns for packages (directories, list of files, import paths, etc).
 	if len(args) == 1 && isDirectory(args[0]) {
@@ -93,6 +95,9 @@ func main() {
 			src = g.buf.Bytes()
 		} else {
 			g.Printf("import %s", "\"github.com/go-leo/errors\"\n")
+			if g.registerPkg != "" {
+				g.Printf("import %s", "code \""+g.registerPkg+"\"\n")
+			}
 			g.Printf("import %s", "\"fmt\"\n")
 			g.generate(typeName)
 			g.generateErrFuncs(typeName)
@@ -137,7 +142,8 @@ type Generator struct {
 	buf bytes.Buffer // Accumulated output.
 	pkg *Package     // Package we are scanning.
 
-	trimPrefix string
+	trimPrefix  string
+	registerPkg string
 }
 
 // Printf like fmt.Printf, but add the string to g.buf.
@@ -223,7 +229,11 @@ func (g *Generator) generate(typeName string) {
 	g.Printf("func init() {\n")
 	for _, v := range values {
 		code, description := v.ParseComment()
-		g.Printf("\tregister(%s, %s, \"%s\")\n", v.originalName, code, description)
+		if g.registerPkg != "" {
+			g.Printf("\tcode.Register(%s, %s, \"%s\")\n", v.originalName, code, description)
+		} else {
+			g.Printf("\tregister(%s, %s, \"%s\")\n", v.originalName, code, description)
+		}
 	}
 	g.Printf("}\n")
 }

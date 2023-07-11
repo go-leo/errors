@@ -140,15 +140,15 @@ func ParseCoder(err error) Coder {
 
 // GRPCErr convert error to grpc error.
 // if err no register Coder, return unknown grpc error.
-func GRPCErr(err error) error {
-	s := GRPCStatus(err)
-	if s == nil {
-		return nil
-	}
-	return s.Err()
-}
+// func GRPCErr(err error) error {
+// 	s := GRPCStatus(err)
+// 	if s == nil {
+// 		return nil
+// 	}
+// 	return s.Err()
+// }
 
-// GRPCStatus convert error to grpc error.
+// GRPCStatus convert error to grpc *status.Status.
 // if err no register Coder, return unknown grpc error.
 func GRPCStatus(err error) *status.Status {
 	if err == nil {
@@ -156,7 +156,6 @@ func GRPCStatus(err error) *status.Status {
 	}
 
 	var c Coder = UnknownCoder
-
 	if v := new(withCode); errors.As(err, &v) {
 		coder, ok := codes[v.code]
 		if ok {
@@ -164,6 +163,21 @@ func GRPCStatus(err error) *status.Status {
 		}
 	}
 
+	s, _ := status.New(ToGRPCCode(c.HTTPStatus()), c.String()).
+		WithDetails(&Status{
+			Code: int32(c.Code()),
+			Http: int32(c.HTTPStatus()),
+			Ref:  c.Reference(),
+		})
+
+	return s
+}
+
+// GRPCCodeStatus convert code to grpc *status.Status.
+// if err no register Coder, return unknown grpc error.
+// If code is known, it is more efficient to use this method than GRPCStatus.
+func GRPCCodeStatus(code int) *status.Status {
+	c := GetCoder(code)
 	s, _ := status.New(ToGRPCCode(c.HTTPStatus()), c.String()).
 		WithDetails(&Status{
 			Code: int32(c.Code()),

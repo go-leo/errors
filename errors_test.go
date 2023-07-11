@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/grpc/status"
 )
 
 func TestWithCode(t *testing.T) {
@@ -57,7 +58,16 @@ func TestIsCode(t *testing.T) {
 	assert.True(t, IsCode(err, ConfigurationNotValid))
 
 	// grpc error
-	assert.True(t, IsCode(GRPCErr(err), ConfigurationNotValid))
+	ge, ok := status.FromError(err)
+	assert.True(t, ok)
+	code := 0
+	for _, detail := range ge.Details() {
+		switch d := detail.(type) {
+		case *Status:
+			code = int(d.Code)
+		}
+	}
+	assert.Equal(t, ConfigurationNotValid, code)
 }
 
 func TestParseCoder(t *testing.T) {
@@ -69,10 +79,10 @@ func TestParseCoder(t *testing.T) {
 		wantCode      int
 		wantReference string
 	}{
-		{"std error", fmt.Errorf("std error"), 500, "An internal server error occurred", 1, "http://github.com/panda/errors/README.md"},
+		{"std error", fmt.Errorf("std error"), 500, "An internal server error occurred", 1, "http://github.com/go-leo/errors/README.md"},
 		{"WithCode error", NewWithCode(ErrInvalidJSON, "json error"), 500, "Data is not valid JSON", 1001, ""},
 		{"grpc error", GRPCStatus(NewWithCode(ErrInvalidJSON, "json error")).Err(), 500, "Data is not valid JSON", 1001, ""},
-		{"grpc error", GRPCStatus(fmt.Errorf("std error")).Err(), 500, "An internal server error occurred", 1, "http://github.com/panda/errors/README.md"},
+		{"grpc error", GRPCStatus(fmt.Errorf("std error")).Err(), 500, "An internal server error occurred", 1, "http://github.com/go-leo/errors/README.md"},
 	}
 
 	for i, tt := range tests {
@@ -93,5 +103,4 @@ func TestParseCoder(t *testing.T) {
 			t.Errorf("TestCodeParse(%d): got %q, want: %q", i, coder.Reference(), tt.wantReference)
 		}
 	}
-
 }
